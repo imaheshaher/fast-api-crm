@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leads</title>
+    <!-- Add Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Leads</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Phone Work</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td contenteditable="true" data-id="{{ item._id }}" data-field="first_name" class="editable">{{ item.first_name }}</td>
+                    <td contenteditable="true" data-id="{{ item._id }}" data-field="last_name" class="editable">{{ item.last_name }}</td>
+                    <td contenteditable="true" data-id="{{ item._id }}" data-field="phone_work" class="editable">{{ item.phone_work }}</td>
+                    <td>
+                        <button class="btn btn-primary update-button" data-id="{{ item._id }}">Update</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        const updateButtons = document.querySelectorAll('.update-button');
+        const editableFields = document.querySelectorAll('.editable');
+
+        updateButtons.forEach(updateButton => {
+            updateButton.addEventListener('click', () => {
+                const id = updateButton.getAttribute('data-id');
+                const updatedData = {};
+                updatedData['id'] = id;
+
+                editableFields.forEach(field => {
+                    if (field.getAttribute('data-id') === id) {
+                        const fieldName = field.getAttribute('data-field');
+                        const value = field.innerText;
+                        updatedData[fieldName] = value;
+                    }
+                });
+
+                // Send the updatedData to the server for the single row update.
+                fetch('/edit_item/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updatedData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response, such as displaying a success message or updating the UI.
+                    console.log(data);
+                })
+                .catch(error => {
+                    // Handle errors, e.g., display an error message.
+                    console.error('Error:', error);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
